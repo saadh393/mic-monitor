@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Mic Monitor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="recording" hidden>
+      <span id="recording-text"></span>
+      <button id="stop">Stop</button>
+    </div>
+    <h1>Microphone in use by</h1>
+    <div id="permission" hidden>
+      Microphone access is not granted.
+      <button id="open-microphone-settings">Open Settings</button>
+    </div>
+    <div id="accessibility" hidden>
+      Accessibility access is needed to show browser tab names.
+      <button id="open-accessibility-settings">Open Settings</button>
+    </div>
+    <ul id="apps"></ul>
+    <p id="empty">No app is using the microphone</p>
+    <h2>Recordings</h2>
+    <ul id="recordings"></ul>
+    <p id="recordings-status" hidden></p>
+    <script src="main.js"></script>
+  </body>
+</html>

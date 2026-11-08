@@ -1,0 +1,76 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+#panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  border-radius: 0 0 16px 16px;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+
+#panel.shown {
+  transform: translateY(0);
+}
+
+#content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 72px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+#text {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+button {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: #fff;
+  background: #333;
+}
+
+#yes {
+  background: #0a84ff;
+}
+
+#settings,
+#finder,
+#panel:not([data-kind="prompt"]) #yes,
+#panel:not([data-kind="prompt"]) #no {
+  display: none;
+}
+
+#panel[data-kind="mic-denied"] #settings,
+#panel[data-kind="audio-missing"] #settings,
+#panel[data-kind="save-denied"] #settings,
+#panel[data-kind="saved"] #finder {
+  display: block;
+  background: #0a84ff;
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Mic Monitor",
+  "version": "0.1.0",
+  "identifier": "com.sadh.micmonitor",
+  "build": {
+    "frontendDist": "../ui"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "title": "Mic Monitor",
+        "width": 360,
+        "height": 420,
+        "visible": false
+      },
+      {
+        "label": "panel",
+        "url": "panel.html",
+        "width": 380,
+        "height": 72,
+        "visible": false,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "focus": false,
+        "resizable": false,
+        "shadow": false,
+        "skipTaskbar": true,
+        "acceptFirstMouse": true
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app"],
+    "macOS": {
+      "minimumSystemVersion": "14.2"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.png"
+    ]
+  }
+}

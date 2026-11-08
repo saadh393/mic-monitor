@@ -1,0 +1,14 @@
+node_modules/
+src-tauri/target/
+src-tauri/gen/schemas/
+
+_docs/
+CLAUDE.md
+.claude/
+
+.DS_Store
+*.log
+.env
+.env.*
+.idea/
+.vscode/

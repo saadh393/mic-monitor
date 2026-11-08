@@ -1,0 +1,128 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, sans-serif;
+  margin: 0;
+  padding: 24px;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 18px;
+}
+
+h2 {
+  font-size: 15px;
+  margin: 8px 0;
+}
+
+#recording {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #fdecea;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+#recording[hidden] {
+  display: none;
+}
+
+#permission,
+#accessibility {
+  background: #fff3cd;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+#apps,
+#recordings {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#apps li {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+#empty,
+#recordings-status {
+  color: #888;
+}
+
+#recordings {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+#recordings li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+#recordings .info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#recordings .name {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: #0a5bd3;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#recordings .meta {
+  font-size: 12px;
+  color: #888;
+}
+
+#recordings li > button {
+  flex-shrink: 0;
+}
+
+#recordings .question {
+  overflow-wrap: anywhere;
+}
+
+#recordings .note {
+  font-size: 12px;
+  color: #c62828;
+}
+
+#recordings input {
+  font: inherit;
+  width: 100%;
+}
