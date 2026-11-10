@@ -31,7 +31,7 @@ fn open(mut on_samples: impl FnMut(&[f32]) + Send + 'static) -> Result<(cpal::St
     let supported = device.default_input_config().map_err(|e| e.to_string())?;
     let config = supported.config();
     let (rate, channels) = (config.sample_rate, config.channels);
-    let device_name = device.name().unwrap_or_else(|_| "default input".into());
+    let device_name = device.description().map(|d| d.name().to_string()).unwrap_or_else(|_| "default input".into());
     let stream = device
         .build_input_stream_raw(
             config,

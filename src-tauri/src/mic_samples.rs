@@ -21,7 +21,7 @@ pub fn to_f32(data: &Data) -> Vec<f32> {
         SampleFormat::U32 => convert::<u32>(data),
         SampleFormat::U64 => convert::<u64>(data),
         SampleFormat::F64 => convert::<f64>(data),
-        SampleFormat::DsdU8 | SampleFormat::DsdU16 | SampleFormat::DsdU32 => Vec::new(),
+        _ => Vec::new(),
     }
 }
 
