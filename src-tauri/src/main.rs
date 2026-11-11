@@ -122,8 +122,9 @@ fn cancel_transcription(
     manager: tauri::State<'_, transcription_backend::TranscriptionManager>,
     path: String,
 ) -> Result<(), String> {
-    manager.cancel(PathBuf::from(path).as_path())?;
-    let name = PathBuf::from(path)
+    let path = PathBuf::from(path);
+    manager.cancel(path.as_path())?;
+    let name = path
         .file_name()
         .ok_or("invalid recording path")?
         .to_string_lossy()
@@ -211,7 +212,7 @@ async fn rename_recording(app: AppHandle, path: String, name: String) -> Result<
     else {
         return Ok(path.to_string_lossy().into_owned());
     };
-    let to = folder.join(new);
+    let to = folder.join(&new);
     recording_file::rename(&path, &to)?;
     metadata_index::rename(&old, &new, &to).map_err(|e| e.to_string())?;
     Ok(to.to_string_lossy().into_owned())

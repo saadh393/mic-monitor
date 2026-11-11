@@ -348,7 +348,7 @@ fn parse_retry_after(value: &str) -> Option<Duration> {
 
 fn prepare_chunks(path: &Path) -> Result<Vec<Vec<u8>>, String> {
     let wav = decode_to_wav(path)?;
-    let mut file = File::open(wav).map_err(|e| e.to_string())?;
+    let mut file = File::open(&wav).map_err(|e| e.to_string())?;
     let mut header = [0u8; 44];
     file.read_exact(&mut header).map_err(|e| e.to_string())?;
     let data_len = file

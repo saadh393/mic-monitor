@@ -142,7 +142,7 @@ pub fn reconcile(folder: &Path) -> rusqlite::Result<Vec<RecordingMetadata>> {
 pub fn list() -> rusqlite::Result<Vec<RecordingMetadata>> {
     let connection = connection()?;
     let mut statement = connection.prepare("SELECT id,name,path,size,modified,created,app,transcription_status,completed_chunks,chunk_count,transcript_text FROM recordings ORDER BY modified DESC, name DESC")?;
-    statement
+    let rows = statement
         .query_map([], |row| {
             Ok(RecordingMetadata {
                 id: row.get(0)?,
@@ -158,7 +158,8 @@ pub fn list() -> rusqlite::Result<Vec<RecordingMetadata>> {
                 transcript_text: row.get(10)?,
             })
         })?
-        .collect()
+        .collect();
+    rows
 }
 
 pub fn set_transcription(
@@ -193,15 +194,16 @@ pub fn remove(name: &str) -> rusqlite::Result<()> {
 
 pub fn excluded() -> rusqlite::Result<Vec<ExcludedApp>> {
     let connection = connection()?;
-    connection
-        .prepare("SELECT name,excluded FROM excluded_apps ORDER BY name")?
+    let mut statement = connection.prepare("SELECT name,excluded FROM excluded_apps ORDER BY name")?;
+    let rows = statement
         .query_map([], |row| {
             Ok(ExcludedApp {
                 name: row.get(0)?,
                 excluded: row.get::<_, i64>(1)? != 0,
             })
         })?
-        .collect()
+        .collect();
+    rows
 }
 
 pub fn set_excluded(name: &str, value: bool) -> rusqlite::Result<()> {
@@ -223,7 +225,7 @@ pub fn is_excluded(name: &str) -> bool {
             .ok()
             .flatten()
         })
-        .unwrap_or(false)
+        .is_some_and(|excluded| excluded != 0)
 }
 
 pub fn setting(key: &str) -> rusqlite::Result<Option<String>> {

@@ -34,7 +34,10 @@ pub fn list() -> Vec<InstalledApp> {
         .flat_map(|root| std::fs::read_dir(root).into_iter().flatten().flatten())
         .filter_map(|entry| {
             let path = entry.path();
-            (path.extension().and_then(|e| e.to_str()) == Some("app")).then(|| InstalledApp {
+            if path.extension().and_then(|e| e.to_str()) != Some("app") {
+                return None;
+            }
+            Some(InstalledApp {
                 name: path.file_stem()?.to_string_lossy().into_owned(),
                 path: path.to_string_lossy().into_owned(),
                 bundle_id: bundle_id(&path),
