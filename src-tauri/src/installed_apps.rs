@@ -5,6 +5,20 @@ use std::path::PathBuf;
 pub struct InstalledApp {
     pub name: String,
     pub path: String,
+    pub bundle_id: Option<String>,
+}
+
+fn bundle_id(path: &PathBuf) -> Option<String> {
+    let info = path.join("Contents/Info.plist");
+    let output = std::process::Command::new("defaults")
+        .args(["read", info.to_str()?, "CFBundleIdentifier"])
+        .output()
+        .ok()?;
+    output
+        .status
+        .success()
+        .then(|| String::from_utf8_lossy(&output.stdout).trim().to_owned())
+        .filter(|id| !id.is_empty())
 }
 
 pub fn list() -> Vec<InstalledApp> {
@@ -23,6 +37,7 @@ pub fn list() -> Vec<InstalledApp> {
             (path.extension().and_then(|e| e.to_str()) == Some("app")).then(|| InstalledApp {
                 name: path.file_stem()?.to_string_lossy().into_owned(),
                 path: path.to_string_lossy().into_owned(),
+                bundle_id: bundle_id(&path),
             })
         })
         .collect::<Vec<_>>();
