@@ -58,4 +58,13 @@ mod tests {
         assert!(plan(100, 0, 1).is_empty());
         assert!(plan(100, 10, 10).is_empty());
     }
+
+    #[test]
+    fn retry_prefers_server_delay_and_caps_exponential_delay() {
+        assert_eq!(
+            retry_delay(2, Some(Duration::from_secs(17))),
+            Duration::from_secs(17)
+        );
+        assert_eq!(retry_delay(20, None), Duration::from_secs(60));
+    }
 }

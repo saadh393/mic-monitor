@@ -34,6 +34,7 @@ mod recordings_list;
 mod save_error;
 mod tab_title;
 mod transcription;
+mod transcription_backend;
 mod tray_menu;
 mod tray_title;
 
@@ -105,24 +106,43 @@ fn export_transcript(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn transcribe_recording(path: String) -> Result<(), String> {
-    let name = PathBuf::from(path)
-        .file_name()
-        .ok_or("invalid recording path")?
-        .to_string_lossy()
-        .into_owned();
-    metadata_index::set_transcription(&name, "queued", 0, 0, None).map_err(|e| e.to_string())?;
+fn transcribe_recording(
+    app: AppHandle,
+    manager: tauri::State<'_, transcription_backend::TranscriptionManager>,
+    path: String,
+) -> Result<(), String> {
+    let path = PathBuf::from(path);
+    path.file_name().ok_or("invalid recording path")?;
+    let _ = manager.enqueue(app, path)?;
     Ok(())
 }
 
 #[tauri::command]
-fn cancel_transcription(path: String) -> Result<(), String> {
+fn cancel_transcription(
+    manager: tauri::State<'_, transcription_backend::TranscriptionManager>,
+    path: String,
+) -> Result<(), String> {
+    manager.cancel(PathBuf::from(path).as_path())?;
     let name = PathBuf::from(path)
         .file_name()
         .ok_or("invalid recording path")?
         .to_string_lossy()
         .into_owned();
-    metadata_index::set_transcription(&name, "none", 0, 0, None).map_err(|e| e.to_string())?;
+    let existing = metadata_index::list()
+        .map_err(|e| e.to_string())?
+        .into_iter()
+        .find(|item| item.name == name);
+    let (completed, total, text) = existing
+        .map(|item| {
+            (
+                item.completed_chunks,
+                item.chunk_count,
+                item.transcript_text,
+            )
+        })
+        .unwrap_or((0, 0, None));
+    metadata_index::set_transcription(&name, "cancelled", completed, total, text.as_deref())
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -294,6 +314,7 @@ fn main() {
             panel_dismiss
         ])
         .setup(|app| {
+            app.manage(transcription_backend::TranscriptionManager::start());
             app.manage(Mutex::new(Flow::default()));
             app.manage(Mutex::new(None::<Recording>));
             TrayIconBuilder::with_id("main")
