@@ -1,29 +1,28 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mic Monitor</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <div id="recording" hidden>
-      <span id="recording-text"></span>
-      <button id="stop">Stop</button>
-    </div>
-    <h1>Microphone in use by</h1>
-    <div id="permission" hidden>
-      Microphone access is not granted.
-      <button id="open-microphone-settings">Open Settings</button>
-    </div>
-    <div id="accessibility" hidden>
-      Accessibility access is needed to show browser tab names.
-      <button id="open-accessibility-settings">Open Settings</button>
-    </div>
-    <ul id="apps"></ul>
-    <p id="empty">No app is using the microphone</p>
-    <h2>Recordings</h2>
-    <ul id="recordings"></ul>
-    <p id="recordings-status" hidden></p>
+    <aside class="sidebar">
+      <strong class="brand">◉ Mic Monitor</strong>
+      <nav><button class="nav active" data-view="library">Library</button><button class="nav" data-view="settings">Settings</button></nav>
+      <small>● Monitoring microphone</small>
+    </aside>
+    <main>
+      <section id="library-view">
+        <header><div><small class="eyebrow">RECORDINGS</small><h1>Your meetings, in one place.</h1><p>Search, listen, and turn conversations into clear next steps.</p></div><button id="refresh" class="icon">↻</button></header>
+        <div id="active-recording" class="active" hidden><span>●</span><strong id="active-recording-text"></strong><button id="stop" class="button danger">Stop</button></div>
+        <div class="toolbar"><label>⌕ <input id="search" type="search" placeholder="Search recordings and transcripts"></label><select id="sort"><option value="date">Newest first</option><option value="duration">Longest first</option></select><select id="status-filter"><option value="all">All statuses</option><option value="none">Not transcribed</option><option value="done">Transcribed</option><option value="failed">Failed</option></select></div>
+        <div id="library-loading" class="state">Loading recordings…</div><div id="library-error" class="state" hidden>Recordings could not be loaded.<p id="library-error-text"></p><button id="retry" class="button">Try again</button></div><div id="library-empty" class="state" hidden>No recordings yet.<p>When you record a meeting, it will appear here.</p></div><div id="recordings"></div>
+      </section>
+      <section id="settings-view" hidden><header><div><small class="eyebrow">PREFERENCES</small><h1>Settings</h1><p>Keep your data local and your workflow focused.</p></div></header><div class="settings-grid"><article class="card"><h2>Gemini transcription</h2><p>Use Gemini to create searchable meeting notes.</p><label>API key</label><input id="api-key" type="password" placeholder="Paste your Gemini API key"><div><button id="save-key" class="button">Save key</button><button id="test-key" class="button secondary">Test</button><button id="remove-key" class="text danger-text">Remove</button></div><p id="key-status"></p><label>Model</label><select id="model"><option value="gemini-2.5-flash">Gemini 2.5 Flash</option><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option></select></article><article class="card"><h2>Excluded applications</h2><p>These apps never trigger the recording prompt.</p><div class="row"><select id="installed-apps"></select><button id="exclude-app" class="button">Exclude</button></div><div id="excluded-apps"></div><p id="excluded-empty">No applications excluded.</p></article></div></section>
+      <section id="reader-view" hidden><header><button id="back-to-library" class="text">← Library</button><div><button id="copy-transcript" class="button secondary">Copy all</button><button id="export-transcript" class="button">Export .md</button></div></header><article class="reader"><small class="eyebrow">TRANSCRIPT</small><h1 id="reader-title"></h1><p id="reader-meta"></p><input id="transcript-search" placeholder="Search this transcript"><div id="transcript-content"></div><audio id="audio-player" controls></audio></article></section>
+    </main>
+    <div id="toast"></div>
     <script src="main.js"></script>
   </body>
 </html>
