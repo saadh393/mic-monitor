@@ -3,9 +3,12 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager};
 
-use crate::mic_session::{self, Event, MicApp, Sessions};
 use crate::meeting_flow::Input;
-use crate::{accessibility, app_name, meeting, mic, own_process, parent_pid, process_path, recording, tray_menu, tray_title};
+use crate::mic_session::{self, Event, MicApp, Sessions};
+use crate::{
+    accessibility, app_name, meeting, metadata_index, mic, own_process, parent_pid, process_path,
+    recording, tray_menu, tray_title,
+};
 
 pub fn name_of(pid: i32) -> Option<String> {
     process_path::of(pid).map(|path| app_name::from_path(&path))
@@ -13,7 +16,8 @@ pub fn name_of(pid: i32) -> Option<String> {
 
 fn app_process(pid: i32) -> Option<(i32, String)> {
     let name = name_of(pid)?;
-    let parent = parent_pid::of(pid).filter(|&parent| name_of(parent).as_deref() == Some(name.as_str()));
+    let parent =
+        parent_pid::of(pid).filter(|&parent| name_of(parent).as_deref() == Some(name.as_str()));
     Some((parent.unwrap_or(pid), name))
 }
 
@@ -22,14 +26,28 @@ fn labels(pid: i32, name: String) -> Vec<String> {
     if tabs.is_empty() {
         return vec![name];
     }
-    tabs.into_iter().map(|tab| format!("{name} — {tab}")).collect()
+    tabs.into_iter()
+        .map(|tab| format!("{name} — {tab}"))
+        .collect()
 }
 
 pub fn mic_apps() -> Vec<MicApp> {
-    let mut processes: Vec<(i32, String)> = own_process::without(mic::input_pids(), std::process::id() as i32).into_iter().filter_map(app_process).collect();
+    let mut processes: Vec<(i32, String)> =
+        own_process::without(mic::input_pids(), std::process::id() as i32)
+            .into_iter()
+            .filter_map(app_process)
+            .collect();
     processes.sort();
     processes.dedup();
-    processes.into_iter().map(|(pid, name)| MicApp { pid, labels: labels(pid, name.clone()), name }).collect()
+    processes
+        .into_iter()
+        .filter(|(_, name)| !metadata_index::is_excluded(name))
+        .map(|(pid, name)| MicApp {
+            pid,
+            labels: labels(pid, name.clone()),
+            name,
+        })
+        .collect()
 }
 
 fn users_of(apps: &[MicApp]) -> Vec<String> {
@@ -73,7 +91,8 @@ pub fn start(app: AppHandle) {
             let current = (users_of(&apps), recording::is_active(&app));
             if let Some(tray) = app.tray_by_id("main") {
                 if current.1 != last.1 {
-                    let _ = tray_menu::build(&app, current.1).and_then(|menu| tray.set_menu(Some(menu)));
+                    let _ = tray_menu::build(&app, current.1)
+                        .and_then(|menu| tray.set_menu(Some(menu)));
                 }
                 if current != last {
                     let _ = tray.set_title(tray_title::of(&current.0, current.1));
