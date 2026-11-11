@@ -12,6 +12,10 @@ pub struct RecordingMetadata {
     pub modified: u64,
     pub created: u64,
     pub app: Option<String>,
+    pub transcription_status: String,
+    pub completed_chunks: u32,
+    pub chunk_count: u32,
+    pub transcript_text: Option<String>,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -48,7 +52,11 @@ fn connection() -> rusqlite::Result<Connection> {
              size INTEGER NOT NULL,
              modified INTEGER NOT NULL,
              created INTEGER NOT NULL,
-             app TEXT
+             app TEXT,
+             transcription_status TEXT NOT NULL DEFAULT 'none',
+             completed_chunks INTEGER NOT NULL DEFAULT 0,
+             chunk_count INTEGER NOT NULL DEFAULT 0,
+             transcript_text TEXT
          );
          CREATE TABLE IF NOT EXISTS excluded_apps (
              name TEXT PRIMARY KEY,
@@ -59,6 +67,19 @@ fn connection() -> rusqlite::Result<Connection> {
              value TEXT NOT NULL
          );",
     )?;
+    let _ = connection.execute(
+        "ALTER TABLE recordings ADD COLUMN transcription_status TEXT NOT NULL DEFAULT 'none'",
+        [],
+    );
+    let _ = connection.execute(
+        "ALTER TABLE recordings ADD COLUMN completed_chunks INTEGER NOT NULL DEFAULT 0",
+        [],
+    );
+    let _ = connection.execute(
+        "ALTER TABLE recordings ADD COLUMN chunk_count INTEGER NOT NULL DEFAULT 0",
+        [],
+    );
+    let _ = connection.execute("ALTER TABLE recordings ADD COLUMN transcript_text TEXT", []);
     Ok(connection)
 }
 
@@ -120,7 +141,7 @@ pub fn reconcile(folder: &Path) -> rusqlite::Result<Vec<RecordingMetadata>> {
 
 pub fn list() -> rusqlite::Result<Vec<RecordingMetadata>> {
     let connection = connection()?;
-    let mut statement = connection.prepare("SELECT id,name,path,size,modified,created,app FROM recordings ORDER BY modified DESC, name DESC")?;
+    let mut statement = connection.prepare("SELECT id,name,path,size,modified,created,app,transcription_status,completed_chunks,chunk_count,transcript_text FROM recordings ORDER BY modified DESC, name DESC")?;
     statement
         .query_map([], |row| {
             Ok(RecordingMetadata {
@@ -131,9 +152,28 @@ pub fn list() -> rusqlite::Result<Vec<RecordingMetadata>> {
                 modified: row.get::<_, i64>(4)? as u64,
                 created: row.get::<_, i64>(5)? as u64,
                 app: row.get(6)?,
+                transcription_status: row.get(7)?,
+                completed_chunks: row.get::<_, i64>(8)? as u32,
+                chunk_count: row.get::<_, i64>(9)? as u32,
+                transcript_text: row.get(10)?,
             })
         })?
         .collect()
+}
+
+pub fn set_transcription(
+    name: &str,
+    status: &str,
+    completed: u32,
+    total: u32,
+    text: Option<&str>,
+) -> rusqlite::Result<()> {
+    let connection = connection()?;
+    connection.execute(
+        "UPDATE recordings SET transcription_status=?1,completed_chunks=?2,chunk_count=?3,transcript_text=?4 WHERE name=?5",
+        params![status, completed, total, text, name],
+    )?;
+    Ok(())
 }
 
 pub fn rename(old: &str, new: &str, path: &Path) -> rusqlite::Result<()> {

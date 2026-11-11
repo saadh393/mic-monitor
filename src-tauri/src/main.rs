@@ -33,6 +33,7 @@ mod recordings_folder;
 mod recordings_list;
 mod save_error;
 mod tab_title;
+mod transcription;
 mod tray_menu;
 mod tray_title;
 
@@ -101,6 +102,28 @@ fn export_transcript(path: String) -> Result<String, String> {
     let target = downloads.join(source.file_name().ok_or("invalid transcript name")?);
     std::fs::copy(&source, &target).map_err(|e| e.to_string())?;
     Ok(target.to_string_lossy().into_owned())
+}
+
+#[tauri::command]
+fn transcribe_recording(path: String) -> Result<(), String> {
+    let name = PathBuf::from(path)
+        .file_name()
+        .ok_or("invalid recording path")?
+        .to_string_lossy()
+        .into_owned();
+    metadata_index::set_transcription(&name, "queued", 0, 0, None).map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn cancel_transcription(path: String) -> Result<(), String> {
+    let name = PathBuf::from(path)
+        .file_name()
+        .ok_or("invalid recording path")?
+        .to_string_lossy()
+        .into_owned();
+    metadata_index::set_transcription(&name, "none", 0, 0, None).map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 #[derive(serde::Serialize)]
@@ -253,6 +276,8 @@ fn main() {
             open_recording,
             recording_transcript,
             export_transcript,
+            transcribe_recording,
+            cancel_transcription,
             recordings,
             current_recording,
             delete_recording,
